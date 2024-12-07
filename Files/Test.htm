@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<style>
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {font-family: Arial;}
+
+/* Style the tab */
+.tab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+  font-size: 17px;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+</style>
+</head>
+<body>
+
+<!--
+
+input[type="text"]{
+  width: 10%;
+//  height: 3vh;
+}
+
+input[type="button"]{
+  width: 25%;
+//  height: 3.6vh;
+}
+
+.rxd{
+  height: 90vh;
+}
+
+textarea {
+  width: 99%;
+  height: 100%;
+  resize: none;
+}
+
+-->
+
+</style>
+
+<script>
+var Socket;
+function start_WebSocket() {
+// Socket = new WebSocket('ws://segmentclock.fritz.box');
+// Socket = new WebSocket('ws://192.168.0.254:81/');
+  Socket = new WebSocket('ws://' + window.location.hostname + ':81/');
+  
+  Socket.onmessage = function(evt) {
+  	document.getElementById("rxConsole").value += evt.data+"\n";
+    if (evt.data.charAt(0)=='d') {
+  	  value=evt.data.substring(1);
+  	  const slider = document.getElementById("slider");
+  	  slider.value=value;
+  	  const output = document.getElementById("output");
+  	  output.value=value;
+	  }
+  }
+}
+
+function enterpressed() {
+ Socket.send(document.getElementById("txbuff").value);
+ document.getElementById("txbuff").value = "";
+}
+
+function brightness_click() {
+	const output = document.getElementById("output");
+	Socket.send("d"+output.value);
+	return true;
+}
+
+function timer_click() {
+	const output = document.getElementById("number");
+	Socket.send("t"+output.value);
+	return true;
+}
+
+function On() {
+	const output = document.forms.onoff_form.onoff;
+	Socket.send("o"+output.value);
+	return true;
+}
+
+function Off() {
+	const output = document.forms.onoff_form.onoff;
+	Socket.send("o"+output.value);
+	return true;
+}
+
+function Uhrzeit + Temperatur() {
+	const output = document.forms.Einstellungen_form.Einstellungen;
+	Socket.send("T");
+	return true;
+}
+
+function Uhrzeit() {
+	const output = document.forms.Einstellungen_form.Einstellungen;
+	Socket.send("U");
+	return true;
+}
+
+function Lernzeit() {
+	const output = document.forms.Einstellungen_form.Einstellungen;
+	Socket.send("L");
+	return true;
+}
+
+function start() {
+	start_WebSocket();
+	
+	document.getElementById("output").value="1";
+	const slider = document.getElementById("slider");
+	const output = document.getElementById("output");
+	document.addEventListener('DOMContentLoaded', function() {
+	  output.value = slider.value;
+	});
+
+	slider.addEventListener ("input", function () {
+	   output.value = this.value;
+	});  
+}
+
+</script>
+
+
+<body onload="javascript:start();">
+
+<!--
+   <div>		
+		<input class="txd" type="text" id="txbuff" onkeydown="if(event.keyCode == 13) enterpressed();">
+		<input class="txd" type="button" onclick="enterpressed();" value="Send" >
+  </div>
+  <br>
+  <br>
+-->
+
+<form name="onoff_form">
+      <input type="radio" name="onoff" value="1" id="onoff" checked="checked" onclick="return On();">On</input>
+      <input type="radio" name="onoff" value="0" id="onoff" onclick="return Off();">Off</input>
+</form>
+
+<form id="sliderform">
+<input type="text" name="output" id="output" value="ddd"/>
+<input type="range" id="slider" min="0" max="255" step="5" value="20">
+<input type="button" value="Helligkeit setzen" onclick="return brightness_click();"/>
+</form>
+<br>
+<br>
+
+
+<form id="sliderform">
+<input type="number" id="number" min="0" max="255" step="2" value="20">
+<input type="button" value="Timer setzen" onclick="return timer_click();"/>
+</form>
+
+<br>
+<br>
+
+<form name="Einstellungen_form">
+
+<div class="tab">
+  <button class="tablinks" onclick="openCity(event, 'Uhrzeit + Temperatur')">Uhrzeit + Temperatur</button>
+  <button class="tablinks" onclick="openCity(event, 'Uhrzeit')">Uhrzeit</button>
+  <button class="tablinks" onclick="openCity(event, 'Lernzeit')">Lernzeit</button>
+</div>
+
+<div id="Uhrzeit + Temperatur" class="tabcontent">
+
+<input type="button" value="Uhrzeit + Temperatur" onclick="return Uhrzeit + Temperatur();"/>
+</div>
+
+<div id="Uhrzeit" class="tabcontent">
+
+<input type="button" value="Uhrzeit" onclick="return Uhrzeit();"/>
+</div>
+
+<div id="Lernzeit" class="tabcontent">
+  
+  <input type="number" id="Einstellen" min="0" max="60" step="5" value="30">
+<input type="button" value="Lernzeit setzen" onclick="return timer_click();"/>
+
+  
+</div>
+
+
+</form>
+
+
+<script>
+function openCity(evt, cityName) {
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+  document.getElementById(cityName).style.display = "block";
+  evt.currentTarget.className += " active";
+}
+</script>
+
+  
+<br>
+<br>
+  
+  <div class="rxd">
+    <textarea id="rxConsole" readonly></textarea>
+  </div>
+  
+  
+</body>
+</html>
+
+
+
+
+
+
+
