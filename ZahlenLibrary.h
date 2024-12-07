@@ -3,8 +3,8 @@
 #include <NeoPixelBus.h>
 //#include<IoAbstraction.h>
 
-const uint16_t PixelCount = 30; // this example assumes 4 pixels, making it smaller will cause a failure
-const uint8_t PixelPin = D4;  // wird bei ESP ignoriert; Strip muss an RX (=GPIO3) angeschlossen werden
+const uint16_t PixelCount = 30; 
+const uint8_t PixelPin = D4;  
 
 long lastDoublePointChange = 0;
 
