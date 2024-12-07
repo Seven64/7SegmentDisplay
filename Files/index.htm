@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+  <head>
+<style>
+body {font-family: Arial;}
+
+/* Style the tab */
+.tab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+  font-size: 17px;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+
+input[type="text"]{
+  width: 10%;
+//  height: 3vh;
+}
+
+input[type="button"]{
+  width: 25%;
+//  height: 3.6vh;
+}
+
+.rxd{
+  height: 90vh;
+}
+
+textarea {
+  width: 99%;
+  height: 100%;
+  resize: none;
+}
+
+</style>
+
+
+
+<script>
+var Socket;
+function start_WebSocket() {
+// Socket = new WebSocket('ws://segmentclock.fritz.box');
+// Socket = new WebSocket('ws://192.168.0.254:81/');
+  Socket = new WebSocket('ws://' + window.location.hostname + ':81/');
+  
+  Socket.onmessage = function(evt) {
+  	document.getElementById("rxConsole").value += evt.data+"\n";
+    if (evt.data.charAt(0)=='d') {
+  	  value=evt.data.substring(1);
+  	  const slider = document.getElementById("slider");
+  	  slider.value=value;
+  	  const output = document.getElementById("output");
+  	  output.value=value;
+	  } else if (evt.data.charAt(0)=='o') {
+  	  value=evt.data.substring(1);
+  	  const onoff = document.forms.onoff_form.onoff;
+  	  onoff.value=value;
+	  }
+  }
+}
+
+function enterpressed() {
+ Socket.send(document.getElementById("txbuff").value);
+ document.getElementById("txbuff").value = "";
+}
+
+function brightness_click() {
+	const output = document.getElementById("output");
+	Socket.send("d"+output.value);
+	return true;
+}
+
+function timer_click() {
+	const output = document.getElementById("number");
+	Socket.send("t"+output.value);
+	return true;
+}
+
+function On() {
+	const output = document.forms.onoff_form.onoff;
+	Socket.send("o"+output.value);
+	return true;
+}
+
+function Off() {
+	const output = document.forms.onoff_form.onoff;
+	Socket.send("o"+output.value);
+	return true;
+}
+
+function Uhrzeit_und_Temperatur() {
+//	const output = document.forms.Einstellungen_form.Einstellungen;
+	Socket.send("T");
+	return true;
+}
+
+function Uhrzeit() {
+//	const output = document.forms.Einstellungen_form.Einstellungen;
+	Socket.send("U");
+	return true;
+}
+
+function Lernzeit_setzen(){
+	const output = document.forms.Lerntime_form.Lerntime;
+	Socket.send("L"+output.value);
+	return true;
+}
+
+function Nacht() {
+
+	Socket.send("N");
+	return true;
+}
+
+
+
+function Send_Hours() {
+	const output = document.forms.Alarm_form.Alarm_Hours;
+	Socket.send("H"+output.value);
+	return true;
+}
+
+function Send_Minutes() {
+	const output = document.forms.Alarm_form.Alarm_Minutes;
+	Socket.send("M"+output.value);
+	return true;
+}
+
+function Send_AlarmTime() {
+	const output1 = document.forms.Alarm_form.Alarm_Hours;
+	const output2 = document.forms.Alarm_form.Alarm_Minutes;
+	Socket.send("A"+output1.value+output2.value);
+	return true;
+}
+
+
+
+
+function start() {
+	start_WebSocket();
+	
+	document.getElementById("output").value="1";
+	const slider = document.getElementById("slider");
+	const output = document.getElementById("output");
+	document.addEventListener('DOMContentLoaded', function() {
+	  output.value = slider.value;
+	});
+
+	slider.addEventListener ("input", function () {
+	   output.value = this.value;
+	});  
+}
+
+</script>
+</head>
+
+<body onload="javascript:start()">
+
+   <div>		
+		<input class="txd" type="text" id="txbuff" onkeydown="if(event.keyCode == 13) enterpressed();">
+		<input class="txd" type="button" onclick="enterpressed();" value="Send" >
+  </div>
+  <br>
+  <br>
+
+<form name="onoff_form">
+      <input type="radio" name="onoff" value="1" id="onoff1" checked="checked" onclick="return On();">On</input>
+      <input type="radio" name="onoff" value="0" id="onoff2" onclick="return Off();">Off</input>
+</form>
+
+<form id="sliderform">
+<input type="text" name="output" id="output" value="ddd"/>
+<input type="range" id="slider" min="0" max="255" step="5" value="20">
+<input type="button" value="Helligkeit setzen" onclick="return brightness_click();"/>
+</form>
+<br>
+<br>
+
+
+<form id="sliderform">
+<input type="number" id="number" min="0" max="255" step="2" value="20">
+<input type="button" value="Timer setzen" onclick="return timer_click();"/>
+</form>
+
+<br>
+<br>
+
+
+
+</form>
+
+<div class="tab">
+  <button class="tablinks" onclick="openCity(event, 'Uhrzeit + Temperatur')">Uhrzeit + Temperatur</button>
+  <button class="tablinks" onclick="openCity(event, 'Uhrzeit')">Uhrzeit</button>
+  <button class="tablinks" onclick="openCity(event, 'Lernzeit')">Lernzeit</button>
+  <button class="tablinks" onclick="openCity(event, 'Nacht')">Nachtmodus</button>
+  <button class="tablinks" onclick="openCity(event, 'Wecker')">Weckzeit einstellen</button>
+</div>
+
+<div id="Uhrzeit + Temperatur" class="tabcontent">
+
+<input type="button" value="Uhrzeit + Temperatur" onclick="return Uhrzeit_und_Temperatur();"/>
+</div>
+
+<div id="Uhrzeit" class="tabcontent">
+
+<input type="button" value="Uhrzeit" onclick="return Uhrzeit();"/>
+</div>
+
+<div id="Lernzeit" class="tabcontent">
+  
+  <form name="Lerntime_form">
+    <input type="number" id="Lerntime" name="Lerntime" min="0" max="60" step="5" value="30">
+    <input type="button" value="Lernzeit setzen" onclick="return Lernzeit_setzen();"/>
+  </form>
+  
+</div>
+
+<div id="Nacht" class="tabcontent">
+
+<input type="button" value="Nachtmodus setzen" onclick="return Nacht();"/>
+</div>
+
+<div id="Wecker" class="tabcontent">
+  
+<h3>Bitte stellen sie hier die Uhrzeit ein.</h3>
+
+<form name="Alarm_form">
+  <select name="Alarm_Hours" size="0">
+    <option value="00">0</option>
+    <option value="01">1</option>
+    <option value="02">2</option>
+    <option value="03">3</option>
+    <option value="04">4</option>
+    <option value="05" selected>5</option>
+    <option value="06">6</option>
+    <option value="07">7</option>
+    <option value="08">8</option>
+    <option value="09">9</option>
+    <option value="10">10</option>
+    <option value="11">11</option>
+    <option value="12">12</option>
+    <option value="13">13</option>
+    <option value="14">14</option>
+    <option value="15">15</option>
+    <option value="16">16</option>
+    <option value="17">17</option>
+    <option value="18">18</option>
+    <option value="19">19</option>
+    <option value="20">20</option>
+    <option value="21">21</option>
+    <option value="22">22</option>
+    <option value="23">23</option>
+    <option value="24">24</option>
+    
+  </select>
+  
+  <!--input type="button" value="Set Hours" onclick="return Send_Hours();"/-->
+  
+  <select name="Alarm_Minutes" size="0">
+    <option value="00">0</option>
+    <option value="01">1</option>
+    <option value="02">2</option>
+    <option value="03">3</option>
+    <option value="04">4</option>
+    <option value="05">5</option>
+    <option value="06">6</option>
+    <option value="07">7</option>
+    <option value="08">8</option>
+    <option value="09">9</option>
+    <option value="10">10</option>
+    <option value="11">11</option>
+    <option value="12">12</option>
+    <option value="13">13</option>
+    <option value="14">14</option>
+    <option value="15">15</option>
+    <option value="16">16</option>
+    <option value="17">17</option>
+    <option value="18">18</option>
+    <option value="19">19</option>
+    <option value="20">20</option>
+    <option value="21">21</option>
+    <option value="22">22</option>
+    <option value="23">23</option>
+    <option value="24">24</option>
+    <option value="25">25</option>
+    <option value="26">26</option>
+    <option value="27">27</option>
+    <option value="28">28</option>
+    <option value="29">29</option>
+    <option value="30">30</option>
+    <option value="31">31</option>
+    <option value="32">32</option>
+    <option value="33">33</option>
+    <option value="34">34</option>
+    <option value="35">35</option>
+    <option value="36">36</option>
+    <option value="37">37</option>
+    <option value="38">38</option>
+    <option value="39">39</option>
+    <option value="40">40</option>
+    <option value="41">41</option>
+    <option value="42">42</option>
+    <option value="43">43</option>
+    <option value="44">44</option>
+    <option value="45" selected>45</option>
+    <option value="46">46</option>
+    <option value="47">47</option>
+    <option value="48">48</option>
+    <option value="49">49</option>
+    <option value="50">50</option>
+    <option value="51">51</option>
+    <option value="52">52</option>
+    <option value="53">53</option>
+    <option value="54">54</option>
+    <option value="55">55</option>
+    <option value="56">56</option>
+    <option value="57">57</option>
+    <option value="58">58</option>
+    <option value="59">59</option>
+     <!--input type="button" value="Set Minutes" onclick="return Send_Minutes();"/-->
+     <input type="button" value="Set AlarmTime" onclick="return Send_AlarmTime();"/>
+</form>
+  
+</div>
+
+<script>
+function openCity(evt, cityName) {
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+  document.getElementById(cityName).style.display = "block";
+  evt.currentTarget.className += " active";
+}
+</script>
+
+
+  
+  
+
+<br>
+<br>
+  
+  <div class="rxd">
+    <textarea id="rxConsole" readonly></textarea>
+  </div>
+  
+  
+</body>
+</html>
+
+
+
+
+
+
+
