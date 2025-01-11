@@ -13,12 +13,10 @@ double lastNtpUpdate = 0;
 
 String weekdays[8] = {"?So?", "Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"}; // 1-7
 
-//char ssid[] = "@PapaFritz";
-//char pass[] = "1is:DPksskr!";
-char ssid[] = "@Home";
-char pass[] = "th!s !s a test for wlan";
-//char ssid[] = "coderdojo";
-//char pass[] = "alteschmelz";
+
+char ssid[] = "WLAN";
+char pass[] = "PASSWORT";
+
 
 int aktuelleStunde = 0;
 int aktuelleMinute = 0;
